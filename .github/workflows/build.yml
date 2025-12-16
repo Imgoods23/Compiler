@@ -1,0 +1,37 @@
+name: Compile Pawn
+
+on:
+  push:
+    paths:
+      - "gamemodes/**"
+      - "include/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y git build-essential
+
+    - name: Build pawncc
+      run: |
+        git clone https://github.com/compuphase/pawn.git
+        cd pawn/compiler
+        make
+
+    - name: Compile gamemode
+      run: |
+        cd pawn/compiler
+        ./pawncc ../../gamemodes/test.pwn -i../../include
+
+    - name: Upload AMX
+      uses: actions/upload-artifact@v4
+      with:
+        name: amx-result
+        path: pawn/compiler/*.amx
